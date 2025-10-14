@@ -27,7 +27,8 @@
 
             <input type="submit" value="Material hinzufügen">
         </form>
-        <a href="material_table.php" class="back-link">Zurück zur Übersicht</a>
+        <a href="material_table.php" class="back-link">Zurück zur Übersicht</a> </br>
+        <a href="start.php" class="back-link">Logout</a>
     </div>
 </body>
     <!-- Kombination aus Ki mit eigener Arbeit für den Style -->
