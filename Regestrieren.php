@@ -3,72 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Registrieren - Materiallagersystem</title>
-    <style> 
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 20px; 
-            background-color: #48d243d3; 
-        } 
-        h1 { 
-            text-align: center; 
-            color: #333; 
-        } 
-        .login-container { 
-            max-width: 400px; 
-            margin: 0 auto; 
-            background-color: #fff; 
-            padding: 20px; 
-            border-radius: 5px; 
-            box-shadow: 0 0 10px rgba(0,0,0,0.1); 
-        } 
-        label { 
-            display: block; 
-            margin-bottom: 5px; 
-            font-weight: bold; 
-        } 
-        input[type="text"], input[type="password"] { 
-            width: 100%; 
-            padding: 8px; 
-            margin-bottom: 15px; 
-            border: 1px solid #ddd; 
-            border-radius: 4px; 
-        } 
-        input[type="submit"] { 
-            background-color: #4CAF50; 
-            color: white; 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            width: 100%;
-        } 
-        input[type="submit"]:hover { 
-            background-color: #45a049; 
-        } 
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 12px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 12px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .logo {
-            text-align: center;
-            font-size: 24px;
-            color: #4CAF50;
-            margin-bottom: 20px;
-        }
-    </style>
+  
 </head>
 <body>
 <?php

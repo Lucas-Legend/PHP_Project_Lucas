@@ -60,9 +60,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input type="submit" value="🔐 Anmelden">
         </form>
 
-        <!-- ===================================================== -->
-        <!-- REGISTRIERUNGSLINK -->
-        <!-- ===================================================== -->
         <div class="register-link">
             Noch kein Konto? <a href="Regestrieren.php">Registrieren</a>
         </div>
@@ -76,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             font-family: Arial, sans-serif; 
             margin: 20px; 
-            background-color: #48d243d3; 
+            background-color: beige; 
 
         } 
 
