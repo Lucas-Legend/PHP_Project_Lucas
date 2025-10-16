@@ -59,15 +59,25 @@
             margin-bottom: 20px;
             text-align: center;
         }
+        .user-info {
+            text-align: right;
+            margin-bottom: 15px;
+            color: #4CAF50;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['benutzer_id'])) {
     header("Location: main.php?error=Bitte anmelden");
     exit();
 }
+
+// BENUTZER-ID HOLEN
+$benutzer_id = $_SESSION['benutzer_id'];
+$benutzername = $_SESSION['benutzername'];
 
 $error = '';
 
@@ -76,23 +86,27 @@ $pdo = new PDO('mysql:host=localhost;dbname=materiallagerprojekt', 'root', '');
 
 // Formular verarbeiten
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $artikelnummer = $_POST['artikelnummer'];
+    $material = $_POST['material'];
     $bezeichnung = $_POST['bezeichnung'];
+    $artikelnummer = $_POST['artikelnummer'];
     $menge = $_POST['menge'];
     $lagerort = $_POST['lagerort'];
 
-    if (empty($artikelnummer) || empty($bezeichnung) || empty($menge) || empty($lagerort)) {
+    if (empty($material) || empty($bezeichnung) || empty($artikelnummer) || empty($menge) || empty($lagerort)) {
         $error = "Bitte füllen Sie alle Felder aus.";
     } else {
         try {
-            $sql = "INSERT INTO materialien (artikelnummer, bezeichnung, menge, lagerort) 
-                    VALUES (:artikelnummer, :bezeichnung, :menge, :lagerort)";
+            // ✅ + BEZEICHNUNG!
+            $sql = "INSERT INTO material (name, beschreibung, artikelnummer, menge, lagerort, benutzer_id) 
+                    VALUES (:name, :beschreibung, :artikelnummer, :menge, :lagerort, :benutzer_id)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
+                'name' => $material,
+                'beschreibung' => $bezeichnung,     // ← NEU!
                 'artikelnummer' => $artikelnummer,
-                'bezeichnung' => $bezeichnung,
                 'menge' => $menge,
-                'lagerort' => $lagerort
+                'lagerort' => $lagerort,
+                'benutzer_id' => $benutzer_id
             ]);
             header("Location: material_table.php?success=Material erfolgreich hinzugefügt");
             exit();
@@ -104,6 +118,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
     <div class="form-container">
+        <!-- BENUTZER-INFO -->
+        <div class="user-info">
+            👤 Eingeloggt als: <?php echo htmlspecialchars($benutzername); ?> (ID: <?php echo $benutzer_id; ?>)
+        </div>
+        
         <h1>Material hinzufügen</h1>
 
         <?php if ($error): ?>
@@ -111,19 +130,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php endif; ?>
 
         <form method="POST" action="add_material.php">
-            <label for="artikelnummer">Artikelnummer:</label>
-            <input type="text" id="artikelnummer" name="artikelnummer" required>
+            <label for="material">Material:</label>
+            <input type="text" id="material" name="material" required 
+                   value="<?php echo isset($_POST['material']) ? htmlspecialchars($_POST['material']) : ''; ?>">
 
+            <!-- NEUES FELD: BEZEICHNUNG! -->
             <label for="bezeichnung">Bezeichnung:</label>
-            <input type="text" id="bezeichnung" name="bezeichnung" required>
+            <input type="text" id="bezeichnung" name="bezeichnung" required 
+                   value="<?php echo isset($_POST['bezeichnung']) ? htmlspecialchars($_POST['bezeichnung']) : ''; ?>">
+
+            <label for="artikelnummer">Artikelnummer:</label>
+            <input type="text" id="artikelnummer" name="artikelnummer" required 
+                   value="<?php echo isset($_POST['artikelnummer']) ? htmlspecialchars($_POST['artikelnummer']) : ''; ?>">
 
             <label for="menge">Menge:</label>
-            <input type="number" id="menge" name="menge" min="0" required>
+            <input type="number" id="menge" name="menge" min="0" required 
+                   value="<?php echo isset($_POST['menge']) ? htmlspecialchars($_POST['menge']) : ''; ?>">
 
             <label for="lagerort">Lagerort:</label>
-            <input type="text" id="lagerort" name="lagerort" required>
+            <input type="text" id="lagerort" name="lagerort" required 
+                   value="<?php echo isset($_POST['lagerort']) ? htmlspecialchars($_POST['lagerort']) : ''; ?>">
 
-            <input type="submit" value="Material hinzufügen">
+            <input type="submit" value="➕ Material hinzufügen">
         </form>
 
         <a href="material_table.php" class="back-link">← Zurück zur Übersicht</a><br>

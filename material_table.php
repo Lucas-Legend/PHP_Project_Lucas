@@ -54,18 +54,27 @@
             margin-bottom: 20px;
             text-align: center;
         }
+        .add-btn {
+            background-color: #4CAF50; 
+            color: white; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            text-decoration: none; 
+            display: inline-block; 
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['benutzer_id'])) {
     header("Location: main.php?error=Bitte anmelden");
     exit();
 }
 
-$user_id = $_SESSION['user_id'];
-$username = $_SESSION['username'];
+$benutzer_id = $_SESSION['benutzer_id'];
+$benutzername = $_SESSION['benutzername'];
 
 // Datenbankverbindung
 $pdo = new PDO('mysql:host=localhost;dbname=materiallagerprojekt', 'root', '');
@@ -80,7 +89,7 @@ $add_success = isset($_GET['success']) ? $_GET['success'] : '';
     
     <!-- BENUTZER-INFO -->
     <div class="user-info">
-        👤 Eingeloggt als: <?php echo htmlspecialchars($username); ?> (ID: <?php echo $user_id; ?>)
+        👤 Eingeloggt als: <?php echo htmlspecialchars($benutzername); ?> (ID: <?php echo $benutzer_id; ?>)
         <a href="logout.php" style="color: #dc3545; margin-left: 20px;">🚪 Ausloggen</a>
     </div>
 
@@ -92,7 +101,7 @@ $add_success = isset($_GET['success']) ? $_GET['success'] : '';
         <div class="success"><?php echo htmlspecialchars($add_success); ?></div>
     <?php endif; ?>
 
-    <a href="add_material.php" style="background-color: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block; margin-bottom: 20px;">➕ Neues Material hinzufügen</a>
+    <a href="add_material.php" class="add-btn">➕ Neues Material hinzufügen</a>
 
     <table>
         <thead>
@@ -107,7 +116,19 @@ $add_success = isset($_GET['success']) ? $_GET['success'] : '';
         </thead>
         <tbody>
             <?php
-            $stmt = $pdo->query('SELECT * FROM materialien ORDER BY id DESC');
+                // ADMIN (ID 1) = ALLE SEHEN | ANDERE = NUR EIGENE
+                if ($benutzer_id == 1) 
+                {
+                    $sql = "SELECT * FROM material ORDER BY id ASC";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute();
+                }
+                else 
+                {
+                        $sql = "SELECT * FROM material WHERE benutzer_id = :benutzer_id ORDER BY id ASC";
+                        $stmt = $pdo->prepare($sql);
+                        $stmt->execute(['benutzer_id' => $benutzer_id]);
+                }
             if ($stmt->rowCount() == 0): ?>
                 <tr>
                     <td colspan="6" style="text-align: center; color: #666;">
@@ -119,7 +140,7 @@ $add_success = isset($_GET['success']) ? $_GET['success'] : '';
                     <tr>
                         <td><?php echo $row['id']; ?></td>
                         <td><?php echo htmlspecialchars($row['artikelnummer']); ?></td>
-                        <td><?php echo htmlspecialchars($row['bezeichnung']); ?></td>
+                        <td><?php echo htmlspecialchars($row['beschreibung']); ?></td>
                         <td><?php echo $row['menge']; ?></td>
                         <td><?php echo htmlspecialchars($row['lagerort']); ?></td>
                         <td>
