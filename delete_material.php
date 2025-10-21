@@ -54,7 +54,8 @@ $material = $result->fetch();
         <input type="submit" name="loschen" value="🗑️ JA, ENDGÜLTIG LÖSCHEN!" class="red-btn">
     </form>
 
-    <a href="material_table.php" class="back">← Zurück zur Übersicht</a>
+    <a href="material_table.php" class="back">← Zurück zur Übersicht</a> <br>
+    <a href="main.php" class="back-link">← Zurück zum Login</a>
 </div>
 
 </body>
