@@ -19,13 +19,13 @@ $pdo = new PDO('mysql:host=localhost;dbname=materiallagerprojekt', 'root', '');
 if (isset($_POST['speichern'])) {
     $id = $_POST['id'];
     $name = $_POST['name'];
-    $bezeichnung = $_POST['bezeichnung'];
+    $bezeichnung = $_POST['beschreibung'];
     $artikelnummer = $_POST['artikelnummer'];
     $menge = $_POST['menge'];
     $lagerort = $_POST['lagerort'];
     
     // Update SQL
-    $sql = "UPDATE material SET name='$name', bezeichnung='$bezeichnung', artikelnummer='$artikelnummer', menge=$menge, lagerort='$lagerort' WHERE id=$id";
+    $sql = "UPDATE material SET name='$name', beschreibung='$bezeichnung', artikelnummer='$artikelnummer', menge=$menge, lagerort='$lagerort' WHERE id=$id";
     $pdo->query($sql);
     header("Location: material_table.php");
     exit();
@@ -72,7 +72,8 @@ $material = $result->fetch();
         <input type="submit" name="speichern" value="💾 SPEICHERN" class="add-btn">
     </form>
 
-    <a href="material_table.php" class="back">← Zurück zur Übersicht</a>
+    <a href="material_table.php" class="back">← Zurück zur Übersicht</a><br>
+    <a href="main.php" class="back">← Zurück zum Login</a>
 </div>
 
 </body>

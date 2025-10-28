@@ -94,7 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </form>
 
         <a href="material_table.php" class="back-link">← Zurück zur Übersicht</a><br>
-        <a href="main.php" class="back-link">🚪 Logout</a>
+        <a href="main.php" class="back">← Zurück zum Login</a>
     </div>
 
 </body>

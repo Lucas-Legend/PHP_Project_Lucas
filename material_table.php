@@ -2,90 +2,107 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
     <title>Materialübersicht</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <?php
 session_start();
-if (!isset($_SESSION['benutzer_id'])) {
-    header("Location: main.php?error=Bitte anmelden");
-    exit();
-}
-
 $benutzer_id = $_SESSION['benutzer_id'];
 $benutzername = $_SESSION['benutzername'];
 
-// Datenbankverbindung
+// 1. DB verbinden
 $pdo = new PDO('mysql:host=localhost;dbname=materiallagerprojekt', 'root', '');
 
+// 2. Suche holen
+$suche = isset($_GET['suche']) ? $_GET['suche'] : '';
+$attribut = isset($_GET['attribut']) ? $_GET['attribut'] : 'all';
 
+// 3. SQL: Admin=ALLE | User=EIGENE
+$sql = "SELECT * FROM material";
+$admin_id = 1;
+$where = [];
+if ($suche) {
+    if ($attribut == 'all') {
+        $where[] = "(id LIKE '%$suche%' OR name LIKE '%$suche%' OR beschreibung LIKE '%$suche%' OR artikelnummer LIKE '%$suche%' OR menge LIKE '%$suche%' OR lagerort LIKE '%$suche%' OR benutzer_id LIKE '%$suche%')";
+    } else {
+        $where[] = "$attribut LIKE '%$suche%'";
+    }
+}
+if ($benutzer_id != $admin_id) {
+    $where[] = "benutzer_id = $benutzer_id";
+}
+if ($where) {
+    $sql .= " WHERE " . implode(" AND ", $where);
+}
+$sql .= " ORDER BY id DESC";
+
+$result = $pdo->query($sql);
 ?>
 
-<div class="form-container">
-    <h1>Materiallagersystem</h1>
-    
-    <!-- BENUTZER-INFO -->
+<div class="box">
     <div class="user-info">
-        👤 Eingeloggt als: <?php echo htmlspecialchars($benutzername); ?> (ID: <?php echo $benutzer_id; ?>)
-        <a href="logout.php" style="color: #dc3545; margin-left: 20px;">🚪 Ausloggen</a>
+        👤 Eingeloggt als: <?php echo $benutzername; ?> (ID: <?php echo $benutzer_id; ?>)
     </div>
+    
+    <h1>🏭 Materialübersicht</h1>
 
-    <a href="add_material.php" class="add-btn">➕ Neues Material hinzufügen</a>
+    <form method="GET" action="material_table.php">
+        <?php echo '<div style="text-align: right;"> Anmeldung: ' . (new DateTime())->format('d-m-Y H:i') . '</div>';?>
+        <label for="attribut">Suche nach: </label>
+        <select id="attribut" name="attribut">
+            <option value="all" <?php echo $attribut == 'all' ? 'selected' : ''; ?>>Alle Felder</option>
+            <option value="id" <?php echo $attribut == 'id' ? 'selected' : ''; ?>>ID</option>
+            <option value="name" <?php echo $attribut == 'name' ? 'selected' : ''; ?>>Material</option>
+            <option value="beschreibung" <?php echo $attribut == 'beschreibung' ? 'selected' : ''; ?>>Beschreibung</option>
+            <option value="artikelnummer" <?php echo $attribut == 'artikelnummer' ? 'selected' : ''; ?>>Artikelnummer</option>
+            <option value="menge" <?php echo $attribut == 'menge' ? 'selected' : ''; ?>>Menge</option>
+            <option value="lagerort" <?php echo $attribut == 'lagerort' ? 'selected' : ''; ?>>Lagerort</option>
+            <option value="benutzer_id" <?php echo $attribut == 'benutzer_id' ? 'selected' : ''; ?>>Benutzer ID</option>
+        </select>
+        <label for="suche">Suchbegriff:</label>
+        <input type="text" id="suche" name="suche" value="<?php echo htmlspecialchars($suche); ?>">
+        <input type="submit" value="🔍 Suchen" class="add-btn">
+    </form>
+    <br>
+
+    <a href="add_material.php" class="add-btn">➕ Neues Material</a>
 
     <table>
-        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Artikel</th>
+            <th>Material</th>
+            <th>Menge</th>
+            <th>Ort</th>
+            <th>Aktionen</th>
+        </tr>
+        <?php if ($result->rowCount() == 0): ?>
             <tr>
-                <th>ID</th>
-                <th>Artikelnummer</th>
-                <th>Bezeichnung</th>
-                <th>Menge</th>
-                <th>Lagerort</th>
-                <th>Aktionen</th>
+                <td colspan="7" style="text-align: center; color: #666;">
+                    Keine Materialien gefunden. <a href="add_material.php">Erstes Material hinzufügen</a>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            <?php
-                // ADMIN (ID 1) = ALLE SEHEN | ANDERE = NUR EIGENE
-                if ($benutzer_id == 1) 
-                {
-                    $sql = "SELECT * FROM material ORDER BY id ASC";
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute();
-                }
-                else 
-                {
-                        $sql = "SELECT * FROM material WHERE benutzer_id = :benutzer_id ORDER BY id ASC";
-                        $stmt = $pdo->prepare($sql);
-                        $stmt->execute(['benutzer_id' => $benutzer_id]);
-                }
-            if ($stmt->rowCount() == 0): ?>
-                <tr>
-                    <td colspan="6" style="text-align: center; color: #666;">
-                        Noch keine Materialien vorhanden.</a>
-                    </td>
-                </tr>
-            <?php else: 
-                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) { ?>
-                    <tr>
-                        <td><?php echo $row['id']; ?></td>
-                        <td><?php echo htmlspecialchars($row['artikelnummer']); ?></td>
-                        <td><?php echo htmlspecialchars($row['beschreibung']); ?></td>
-                        <td><?php echo $row['menge']; ?></td>
-                        <td><?php echo htmlspecialchars($row['lagerort']); ?></td>
-                        <td>
-                            <a href="edit_material.php?id=<?php echo $row['id']; ?>" style="color: blue;">Bearbeiten</a> | 
-                            <a href="delete_material.php?id=<?php echo $row['id']; ?>" onclick="return confirm('Sind Sie sicher?')" style="color: red;">Löschen</a>
-                        </td>
-                    </tr>
-            <?php } endif; ?>
-        </tbody>
+        <?php else: ?>
+            <?php while ($row = $result->fetch()): ?>
+            <tr>
+                <td><?php echo $row['id']; ?></td>
+                <td><?php echo $row['artikelnummer']; ?></td>
+                <td><?php echo $row['name']; ?> - <?php echo $row['beschreibung']; ?></td>
+                <td><?php echo $row['menge']; ?></td>
+                <td><?php echo $row['lagerort']; ?></td>
+                <td>
+                    <a href="edit_material.php?id=<?php echo $row['id']; ?>" class="edit">bearbeiten</a> | 
+                    <a href="delete_material.php?id=<?php echo $row['id']; ?>" class="delete" onclick="return confirm('Löschen?')">Löschen</a>
+                </td>
+            </tr>
+            <?php endwhile; ?>
+        <?php endif; ?>
     </table>
 
-    <a href="main.php" class="back-link">← Zurück zum Login</a>
+    <a href="main.php" class="back">← Zurück zum Login</a>
 </div>
 
 </body>
 </html>
-<?php $pdo = null; ?>
